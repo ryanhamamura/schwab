@@ -1,7 +1,7 @@
 # Schwab API Go Client
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/yourusername/schwab.svg)](https://pkg.go.dev/github.com/yourusername/schwab)
-[![Go Report Card](https://goreportcard.com/badge/github.com/yourusername/schwab)](https://goreportcard.com/report/github.com/yourusername/schwab)
+[![Go Reference](https://pkg.go.dev/badge/github.com/ryanhamamura/schwab.svg)](https://pkg.go.dev/github.com/ryanhamamura/schwab)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ryanhamamura/schwab)](https://goreportcard.com/report/github.com/ryanhamamura/schwab)
 
 A Go client library for the Charles Schwab API. This package provides a simple and idiomatic way to interact with the Charles Schwab API from Go applications.
 
@@ -18,7 +18,7 @@ A Go client library for the Charles Schwab API. This package provides a simple a
 ## Installation
 
 ```bash
-go get github.com/yourusername/schwab
+go get github.com/ryanhamamura/schwab
 ```
 
 ## Quick Start
@@ -33,7 +33,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/yourusername/schwab"
+	"github.com/ryanhamamura/schwab"
 )
 
 func main() {
@@ -208,7 +208,7 @@ Common error types:
 
 ## Documentation
 
-For full API documentation, see the [Go Reference](https://pkg.go.dev/github.com/yourusername/schwab).
+For full API documentation, see the [Go Reference](https://pkg.go.dev/github.com/ryanhamamura/schwab).
 
 ## License
 
