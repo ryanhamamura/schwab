@@ -5,7 +5,7 @@ RSpec.describe(Schwab) do
     expect(Schwab::VERSION).not_to(be(nil))
   end
 
-  it "does something useful" do
-    expect(false).to(eq(true))
+  it "defines an error class" do
+    expect(Schwab::Error).to(be < StandardError)
   end
 end

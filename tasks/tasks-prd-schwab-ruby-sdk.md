@@ -31,16 +31,16 @@
 ## Tasks
 
 - [ ] 1. Set up core dependencies and project structure
-  - [ ] 1.1 Add required gems to schwab.gemspec: faraday (~> 2.0), oauth2 (~> 2.0), multi_json (~> 1.15), sawyer (~> 0.9)
-  - [ ] 1.2 Add development dependencies to Gemfile: vcr, webmock, pry, yard, simplecov
-  - [ ] 1.3 Run `bundle install` to install all dependencies
-  - [ ] 1.4 Create the lib/schwab directory structure: api/, middleware/, resources/
-  - [ ] 1.5 Set up spec/support directory with vcr.rb configuration file
-  - [ ] 1.6 Configure VCR in spec/support/vcr.rb with cassette library path and filter sensitive data
-  - [ ] 1.7 Update spec/spec_helper.rb to require VCR support and configure RSpec
-  - [ ] 1.8 Create a .env.example file with SCHWAB_CLIENT_ID, SCHWAB_CLIENT_SECRET, SCHWAB_REDIRECT_URI placeholders
-  - [ ] 1.9 Add dotenv gem to Gemfile for development environment variable loading
-  - [ ] 1.10 Update .gitignore to exclude .env and VCR cassettes with sensitive data
+  - [x] 1.1 Add required gems to schwab.gemspec: faraday (~> 2.0), oauth2 (~> 2.0), multi_json (~> 1.15), sawyer (~> 0.9)
+  - [x] 1.2 Add development dependencies to Gemfile: vcr, webmock, pry, yard, simplecov
+  - [x] 1.3 Run `bundle install` to install all dependencies
+  - [x] 1.4 Create the lib/schwab directory structure: api/, middleware/, resources/
+  - [x] 1.5 Set up spec/support directory with vcr.rb configuration file
+  - [x] 1.6 Configure VCR in spec/support/vcr.rb with cassette library path and filter sensitive data
+  - [x] 1.7 Update spec/spec_helper.rb to require VCR support and configure RSpec
+  - [x] 1.8 Create a .env.example file with SCHWAB_CLIENT_ID, SCHWAB_CLIENT_SECRET, SCHWAB_REDIRECT_URI placeholders
+  - [x] 1.9 Add dotenv gem to Gemfile for development environment variable loading
+  - [x] 1.10 Update .gitignore to exclude .env and VCR cassettes with sensitive data
 
 - [ ] 2. Implement OAuth authentication foundation
   - [ ] 2.1 Create lib/schwab/oauth.rb with Schwab::OAuth module
