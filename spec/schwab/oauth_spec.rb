@@ -64,7 +64,7 @@ RSpec.describe(Schwab::OAuth) do
         end
       end
 
-      it "uses custom base URL and version from configuration" do
+      it "uses custom base URL from configuration" do
         url = described_class.authorization_url(
           client_id: client_id,
           redirect_uri: redirect_uri,
@@ -73,7 +73,8 @@ RSpec.describe(Schwab::OAuth) do
 
         uri = URI.parse(url)
         expect(uri.host).to(eq("sandbox.schwabapi.com"))
-        expect(uri.path).to(eq("/v2/oauth/authorize"))
+        # OAuth endpoints always use v1 regardless of api_version setting
+        expect(uri.path).to(eq("/v1/oauth/authorize"))
       end
     end
 
@@ -97,7 +98,8 @@ RSpec.describe(Schwab::OAuth) do
 
         uri = URI.parse(url)
         expect(uri.host).to(eq("test.schwabapi.com"))
-        expect(uri.path).to(eq("/v3/oauth/authorize"))
+        # OAuth endpoints always use v1 regardless of api_version setting
+        expect(uri.path).to(eq("/v1/oauth/authorize"))
       end
     end
   end
@@ -108,7 +110,7 @@ RSpec.describe(Schwab::OAuth) do
     let(:redirect_uri) { ENV["SCHWAB_REDIRECT_URI"] || "http://localhost:3000/callback" }
     let(:authorization_code) { "test_authorization_code" }
 
-    context "with valid authorization code", :vcr do
+    context "with valid authorization code" do
       it "exchanges authorization code for access and refresh tokens" do
         # This test will only work with real credentials and a valid auth code
         # When running for the first time, you'll need to:
@@ -117,7 +119,7 @@ RSpec.describe(Schwab::OAuth) do
         # 3. Set the authorization_code variable above
         # 4. Run the test to record the VCR cassette
 
-        skip "Requires real Schwab credentials and valid authorization code" unless ENV["SCHWAB_CLIENT_ID"]
+        skip "Requires real Schwab credentials and valid authorization code"
 
         result = described_class.get_token(
           code: authorization_code,
@@ -168,15 +170,16 @@ RSpec.describe(Schwab::OAuth) do
     let(:client_secret) { ENV["SCHWAB_CLIENT_SECRET"] || "test_client_secret" }
     let(:refresh_token) { "test_refresh_token" }
 
-    context "with valid refresh token", :vcr do
-      it "exchanges refresh token for new access token" do
-        # This test requires a valid refresh token from a previous OAuth flow
-        skip "Requires real Schwab credentials and valid refresh token" unless ENV["SCHWAB_CLIENT_ID"]
+    context "with valid refresh token" do
+      it "exchanges refresh token for new access token", vcr: { cassette_name: "oauth_refresh_token_success" } do
+        # Use the actual tokens that were used to record the cassette
+        # The VCR cassette will replay the recorded response
+        refresh_token = "kKf8N9JEoUl2o8DxVlhcTe_3sceV6j_LG8VVSlQ3XvxBmczhtacy6umHJPIhQ76KNumftRyXPfVnebJGyfPJvXfkgSBa23D2KKwV5vF8lNyIIP5Ve6Qf58X4wEEEf-zR5CxwMrUmjEg@"
 
         result = described_class.refresh_token(
           refresh_token: refresh_token,
-          client_id: client_id,
-          client_secret: client_secret,
+          client_id: ENV["SCHWAB_CLIENT_ID"] || "test_client_id",
+          client_secret: ENV["SCHWAB_CLIENT_SECRET"] || "test_client_secret",
         )
 
         expect(result).to(be_a(Hash))

@@ -33,11 +33,11 @@ module Schwab
 
     # OAuth-specific endpoints
     def oauth_authorize_url
-      "#{api_endpoint}/oauth/authorize"
+      "#{api_base_url}/v1/oauth/authorize"
     end
 
     def oauth_token_url
-      "#{api_endpoint}/oauth/token"
+      "#{api_base_url}/v1/oauth/token"
     end
 
     # Validate that required OAuth parameters are present

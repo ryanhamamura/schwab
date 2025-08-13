@@ -52,7 +52,7 @@ class OAuthTester
   def show_menu
     puts "\n📋 Main Menu:"
     puts "1. Generate authorization URL"
-    puts "2. Exchange authorization code for tokens"
+    puts "2. Exchange authorization code for tokens (paste redirect URL)"
     puts "3. Test token refresh (requires existing refresh token)"
     puts "4. Show current configuration"
     puts "Q. Quit"
@@ -310,9 +310,10 @@ class OAuthTester
     puts "\n💡 Next Steps:"
     puts "1. Copy and open this URL in your browser"
     puts "2. Log in to Schwab and authorize the application"
-    puts "3. You'll be redirected to Postman's callback page"
-    puts "4. Copy the FULL redirect URL from your browser"
-    puts "5. Use option 2 to exchange the code for tokens"
+    puts "3. You'll be redirected to #{redirect_uri}"
+    puts "4. Copy the FULL URL from your browser's address bar"
+    puts "   (Even if the page shows an error, the URL has what we need)"
+    puts "5. Use option 2 to paste the URL and exchange for tokens"
     puts "\n⚠️  Authorization codes expire quickly (usually within 10 minutes)"
   end
 
@@ -323,9 +324,9 @@ class OAuthTester
     puts "\n📝 Steps:"
     puts "1. First use option 1 to generate an authorization URL"
     puts "2. Open that URL in your browser and authorize with Schwab"
-    puts "3. You'll be redirected to Postman's callback page"
-    puts "4. Copy the entire redirect URL from your browser"
-    puts "   Example: https://oauth.pstmn.io/v1/browser-callback?code=ABC123&state=XYZ"
+    puts "3. You'll be redirected to your callback URL (browser may show error)"
+    puts "4. Copy the entire URL from your browser's address bar"
+    puts "   Example: #{redirect_uri}?code=ABC123&state=XYZ"
 
     print("\n📋 Paste the full redirect URL here: ")
     redirect_url = gets.chomp

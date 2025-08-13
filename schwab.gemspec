@@ -32,10 +32,10 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   # Runtime dependencies
-  spec.add_dependency "faraday", "~> 2.0"
-  spec.add_dependency "oauth2", "~> 2.0"
-  spec.add_dependency "multi_json", "~> 1.15"
-  spec.add_dependency "sawyer", "~> 0.9"
+  spec.add_dependency("faraday", "~> 2.0")
+  spec.add_dependency("multi_json", "~> 1.15")
+  spec.add_dependency("oauth2", "~> 2.0")
+  spec.add_dependency("sawyer", "~> 0.9")
 
   # For more information and examples about making a new gem, check out our
   # guide at: https://bundler.io/guides/creating_gem.html

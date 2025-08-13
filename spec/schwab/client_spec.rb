@@ -121,7 +121,7 @@ RSpec.describe(Schwab::Client) do
       it "makes a GET request" do
         result = client.get("/test", { param: "value" })
 
-        expect(WebMock).to(have_requested(:get, "https://api.test.com/v1/test")
+        expect(WebMock).to(have_requested(:get, "https://api.test.com/test")
           .with(query: { param: "value" }))
         expect(result).to(eq(response_body))
       end
@@ -132,7 +132,7 @@ RSpec.describe(Schwab::Client) do
         body = { key: "value" }
         result = client.post("/test", body)
 
-        expect(WebMock).to(have_requested(:post, "https://api.test.com/v1/test")
+        expect(WebMock).to(have_requested(:post, "https://api.test.com/test")
           .with(body: body.to_json))
         expect(result).to(eq(response_body))
       end
@@ -143,7 +143,7 @@ RSpec.describe(Schwab::Client) do
         body = { key: "value" }
         result = client.put("/test", body)
 
-        expect(WebMock).to(have_requested(:put, "https://api.test.com/v1/test")
+        expect(WebMock).to(have_requested(:put, "https://api.test.com/test")
           .with(body: body.to_json))
         expect(result).to(eq(response_body))
       end
@@ -153,7 +153,7 @@ RSpec.describe(Schwab::Client) do
       it "makes a DELETE request" do
         result = client.delete("/test", { param: "value" })
 
-        expect(WebMock).to(have_requested(:delete, "https://api.test.com/v1/test")
+        expect(WebMock).to(have_requested(:delete, "https://api.test.com/test")
           .with(query: { param: "value" }))
         expect(result).to(eq(response_body))
       end
@@ -164,7 +164,7 @@ RSpec.describe(Schwab::Client) do
         body = { key: "value" }
         result = client.patch("/test", body)
 
-        expect(WebMock).to(have_requested(:patch, "https://api.test.com/v1/test")
+        expect(WebMock).to(have_requested(:patch, "https://api.test.com/test")
           .with(body: body.to_json))
         expect(result).to(eq(response_body))
       end
@@ -225,7 +225,7 @@ RSpec.describe(Schwab::Client) do
 
     context "when API returns 401" do
       before do
-        stub_request(:get, "https://api.test.com/v1/test")
+        stub_request(:get, "https://api.test.com/test")
           .to_return(status: 401, body: "Unauthorized")
       end
 
@@ -236,7 +236,7 @@ RSpec.describe(Schwab::Client) do
 
     context "when API returns 403" do
       before do
-        stub_request(:get, "https://api.test.com/v1/test")
+        stub_request(:get, "https://api.test.com/test")
           .to_return(status: 403, body: "Forbidden")
       end
 
@@ -247,7 +247,7 @@ RSpec.describe(Schwab::Client) do
 
     context "when API returns 404" do
       before do
-        stub_request(:get, "https://api.test.com/v1/test")
+        stub_request(:get, "https://api.test.com/test")
           .to_return(status: 404, body: "Not Found")
       end
 
@@ -258,7 +258,7 @@ RSpec.describe(Schwab::Client) do
 
     context "when API returns 429" do
       before do
-        stub_request(:get, "https://api.test.com/v1/test")
+        stub_request(:get, "https://api.test.com/test")
           .to_return(status: 429, body: "Too Many Requests")
       end
 
@@ -269,7 +269,7 @@ RSpec.describe(Schwab::Client) do
 
     context "when API returns 500" do
       before do
-        stub_request(:get, "https://api.test.com/v1/test")
+        stub_request(:get, "https://api.test.com/test")
           .to_return(status: 500, body: "Internal Server Error")
       end
 
@@ -280,7 +280,7 @@ RSpec.describe(Schwab::Client) do
 
     context "when request times out" do
       before do
-        stub_request(:get, "https://api.test.com/v1/test").to_timeout
+        stub_request(:get, "https://api.test.com/test").to_timeout
       end
 
       it "raises Schwab::Error with timeout message" do

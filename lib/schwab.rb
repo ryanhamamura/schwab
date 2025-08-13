@@ -5,6 +5,7 @@ require_relative "schwab/error"
 require_relative "schwab/configuration"
 require_relative "schwab/oauth"
 require_relative "schwab/client"
+require_relative "schwab/market_data"
 
 module Schwab
   class << self
