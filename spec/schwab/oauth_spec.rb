@@ -171,21 +171,42 @@ RSpec.describe(Schwab::OAuth) do
     let(:refresh_token) { "test_refresh_token" }
 
     context "with valid refresh token" do
-      it "exchanges refresh token for new access token", vcr: { cassette_name: "oauth_refresh_token_success" } do
-        # Use the actual tokens that were used to record the cassette
-        # The VCR cassette will replay the recorded response
-        refresh_token = "kKf8N9JEoUl2o8DxVlhcTe_3sceV6j_LG8VVSlQ3XvxBmczhtacy6umHJPIhQ76KNumftRyXPfVnebJGyfPJvXfkgSBa23D2KKwV5vF8lNyIIP5Ve6Qf58X4wEEEf-zR5CxwMrUmjEg@"
+      it "exchanges refresh token for new access token" do
+        # Stub the token refresh request
+        stub_request(:post, "https://api.schwabapi.com/v1/oauth/token")
+          .with(
+            body: hash_including(
+              "grant_type" => "refresh_token",
+              "refresh_token" => refresh_token,
+            ),
+            headers: {
+              "Authorization" => /Basic .+/,
+              "Content-Type" => "application/x-www-form-urlencoded",
+            },
+          )
+          .to_return(
+            status: 200,
+            body: {
+              access_token: "new_access_token",
+              refresh_token: "new_refresh_token",
+              expires_in: 1800,
+              token_type: "Bearer",
+              scope: "api",
+              id_token: "id_token_value",
+            }.to_json,
+            headers: { "Content-Type" => "application/json" },
+          )
 
         result = described_class.refresh_token(
           refresh_token: refresh_token,
-          client_id: ENV["SCHWAB_CLIENT_ID"] || "test_client_id",
-          client_secret: ENV["SCHWAB_CLIENT_SECRET"] || "test_client_secret",
+          client_id: client_id,
+          client_secret: client_secret,
         )
 
         expect(result).to(be_a(Hash))
-        expect(result[:access_token]).to(be_a(String))
-        expect(result[:refresh_token]).to(be_a(String))
-        expect(result[:expires_in]).to(be_a(Integer))
+        expect(result[:access_token]).to(eq("new_access_token"))
+        expect(result[:refresh_token]).to(eq("new_refresh_token"))
+        expect(result[:expires_in]).to(eq(1800))
         expect(result[:expires_at]).to(be_a(Time))
         expect(result[:token_type]).to(eq("Bearer"))
       end
