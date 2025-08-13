@@ -3,11 +3,15 @@
 require "faraday"
 
 module Schwab
+  # Middleware components for the HTTP client
   module Middleware
     # Faraday middleware for handling rate limits with exponential backoff
     class RateLimit < Faraday::Middleware
+      # Default maximum number of retries for rate-limited requests
       DEFAULT_MAX_RETRIES = 3
+      # Default initial retry delay in seconds
       DEFAULT_RETRY_DELAY = 1 # seconds
+      # Default exponential backoff factor for retries
       DEFAULT_BACKOFF_FACTOR = 2
       RETRY_STATUSES = [429, 503].freeze # Rate limited and Service Unavailable
 
@@ -19,6 +23,9 @@ module Schwab
         @logger = options[:logger]
       end
 
+      # Process the request with rate limit handling
+      # @param env [Faraday::Env] The request environment
+      # @return [Faraday::Response] The response
       def call(env)
         retries = 0
         delay = @retry_delay

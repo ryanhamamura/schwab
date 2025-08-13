@@ -32,10 +32,13 @@ module Schwab
     end
 
     # OAuth-specific endpoints
+    # @return [String] The OAuth authorization URL
     def oauth_authorize_url
       "#{api_base_url}/v1/oauth/authorize"
     end
 
+    # Get the OAuth token endpoint URL
+    # @return [String] The OAuth token URL
     def oauth_token_url
       "#{api_base_url}/v1/oauth/token"
     end

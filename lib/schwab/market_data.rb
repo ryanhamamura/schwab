@@ -3,8 +3,20 @@
 require "uri"
 
 module Schwab
+  # Market Data API endpoints for retrieving quotes, price history, and market information
   module MarketData
     class << self
+      # Get quotes for one or more symbols
+      #
+      # @param symbols [String, Array<String>] Symbol(s) to get quotes for
+      # @param fields [String, Array<String>, nil] Quote fields to include (e.g., "quote", "fundamental")
+      # @param indicative [Boolean] Whether to include indicative quotes
+      # @param client [Schwab::Client, nil] Optional client instance (uses default if not provided)
+      # @return [Hash] Quote data for the requested symbols
+      # @example Get quotes for multiple symbols
+      #   Schwab::MarketData.get_quotes(["AAPL", "MSFT"])
+      # @example Get quotes with specific fields
+      #   Schwab::MarketData.get_quotes("AAPL", fields: ["quote", "fundamental"])
       def get_quotes(symbols, fields: nil, indicative: false, client: nil)
         client ||= default_client
         params = {
@@ -16,6 +28,14 @@ module Schwab
         client.get("/marketdata/v1/quotes", params)
       end
 
+      # Get detailed quote for a single symbol
+      #
+      # @param symbol [String] The symbol to get a quote for
+      # @param fields [String, Array<String>, nil] Quote fields to include
+      # @param client [Schwab::Client, nil] Optional client instance
+      # @return [Hash] Detailed quote data for the symbol
+      # @example Get a single quote
+      #   Schwab::MarketData.get_quote("AAPL")
       def get_quote(symbol, fields: nil, client: nil)
         client ||= default_client
         path = "/marketdata/v1/#{URI.encode_www_form_component(symbol)}/quotes"
@@ -25,6 +45,21 @@ module Schwab
         client.get(path, params)
       end
 
+      # Get price history for a symbol
+      #
+      # @param symbol [String] The symbol to get price history for
+      # @param period_type [String, nil] The type of period ("day", "month", "year", "ytd")
+      # @param period [Integer, nil] The number of periods
+      # @param frequency_type [String, nil] The type of frequency ("minute", "daily", "weekly", "monthly")
+      # @param frequency [Integer, nil] The frequency value
+      # @param start_date [Time, Date, String, Integer, nil] Start date for history
+      # @param end_date [Time, Date, String, Integer, nil] End date for history
+      # @param need_extended_hours [Boolean] Include extended hours data
+      # @param need_previous_close [Boolean] Include previous close data
+      # @param client [Schwab::Client, nil] Optional client instance
+      # @return [Hash] Price history data with candles
+      # @example Get 5 days of history
+      #   Schwab::MarketData.get_quote_history("AAPL", period_type: "day", period: 5)
       def get_quote_history(symbol, period_type: nil, period: nil, frequency_type: nil,
         frequency: nil, start_date: nil, end_date: nil,
         need_extended_hours: true, need_previous_close: false, client: nil)
@@ -44,6 +79,15 @@ module Schwab
         client.get(path, params)
       end
 
+      # Get market movers for an index
+      #
+      # @param index [String] The index symbol (e.g., "$SPX", "$DJI")
+      # @param direction [String, nil] Direction of movement ("up" or "down")
+      # @param change [String, nil] Type of change ("percent" or "value")
+      # @param client [Schwab::Client, nil] Optional client instance
+      # @return [Hash] Market movers data
+      # @example Get top movers for S&P 500
+      #   Schwab::MarketData.get_movers("$SPX", direction: "up", change: "percent")
       def get_movers(index, direction: nil, change: nil, client: nil)
         client ||= default_client
         path = "/marketdata/v1/movers/#{URI.encode_www_form_component(index)}"
@@ -55,6 +99,14 @@ module Schwab
         client.get(path, params)
       end
 
+      # Get market hours for one or more markets
+      #
+      # @param markets [String, Array<String>] Market(s) to get hours for (e.g., "EQUITY", "OPTION")
+      # @param date [Date, Time, String, nil] Date to get market hours for
+      # @param client [Schwab::Client, nil] Optional client instance
+      # @return [Hash] Market hours information
+      # @example Get equity market hours
+      #   Schwab::MarketData.get_market_hours("EQUITY")
       def get_market_hours(markets, date: nil, client: nil)
         client ||= default_client
         params = {

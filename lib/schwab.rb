@@ -7,6 +7,8 @@ require_relative "schwab/oauth"
 require_relative "schwab/client"
 require_relative "schwab/market_data"
 
+# Main namespace for the Schwab API SDK
+# @see https://developer.schwab.com/
 module Schwab
   class << self
     # Global configuration instance

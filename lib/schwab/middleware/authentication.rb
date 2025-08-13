@@ -16,6 +16,9 @@ module Schwab
         @mutex = Mutex.new
       end
 
+      # Process the request with automatic token refresh on 401
+      # @param env [Faraday::Env] The request environment
+      # @return [Faraday::Response] The response
       def call(env)
         # Add the current access token to the request
         env[:request_headers]["Authorization"] = "Bearer #{@access_token}"
@@ -85,6 +88,9 @@ module Schwab
         @token = token
       end
 
+      # Add bearer token to the request
+      # @param env [Faraday::Env] The request environment
+      # @return [Faraday::Response] The response
       def call(env)
         env[:request_headers]["Authorization"] = "Bearer #{@token}" if @token
         @app.call(env)
