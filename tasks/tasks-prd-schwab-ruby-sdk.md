@@ -55,21 +55,21 @@
   - [x] 2.10 Add tests for OAuth.refresh_token with VCR cassette recording
   - [x] 2.11 Create spec/schwab/configuration_spec.rb to test configuration validation and defaults
 
-- [ ] 3. Build HTTP client layer with Faraday
-  - [ ] 3.1 Create lib/schwab/connection.rb with Connection module for Faraday setup
-  - [ ] 3.2 Implement Connection.build method to create Faraday instance with middleware stack
-  - [ ] 3.3 Add OAuth2 token injection middleware to automatically add Authorization header
-  - [ ] 3.4 Create lib/schwab/middleware/authentication.rb for token injection middleware
-  - [ ] 3.5 Add request/response JSON encoding middleware using multi_json
-  - [ ] 3.6 Create lib/schwab/middleware/rate_limit.rb for handling 429 responses with retry logic
-  - [ ] 3.7 Implement exponential backoff strategy in rate limit middleware (max 3 retries)
-  - [ ] 3.8 Add request/response logging middleware with configurable log levels
-  - [ ] 3.9 Create lib/schwab/client.rb with Client class and initialize method accepting access_token
-  - [ ] 3.10 Implement Client#connection method to lazily initialize Faraday connection
-  - [ ] 3.11 Add Client support for auto_refresh option with on_token_refresh callback
-  - [ ] 3.12 Implement thread-safe token refresh using Mutex when auto_refresh is enabled
-  - [ ] 3.13 Create spec/schwab/connection_spec.rb to test Faraday middleware stack
-  - [ ] 3.14 Add spec/schwab/client_spec.rb with tests for client initialization and configuration
+- [x] 3. Build HTTP client layer with Faraday
+  - [x] 3.1 Create lib/schwab/connection.rb with Connection module for Faraday setup
+  - [x] 3.2 Implement Connection.build method to create Faraday instance with middleware stack
+  - [x] 3.3 Add OAuth2 token injection middleware to automatically add Authorization header
+  - [x] 3.4 Create lib/schwab/middleware/authentication.rb for token injection middleware
+  - [x] 3.5 Add request/response JSON encoding middleware using multi_json
+  - [x] 3.6 Create lib/schwab/middleware/rate_limit.rb for handling 429 responses with retry logic
+  - [x] 3.7 Implement exponential backoff strategy in rate limit middleware (max 3 retries)
+  - [x] 3.8 Add request/response logging middleware with configurable log levels
+  - [x] 3.9 Create lib/schwab/client.rb with Client class and initialize method accepting access_token
+  - [x] 3.10 Implement Client#connection method to lazily initialize Faraday connection
+  - [x] 3.11 Add Client support for auto_refresh option with on_token_refresh callback
+  - [x] 3.12 Implement thread-safe token refresh using Mutex when auto_refresh is enabled
+  - [x] 3.13 Create spec/schwab/connection_spec.rb to test Faraday middleware stack
+  - [x] 3.14 Add spec/schwab/client_spec.rb with tests for client initialization and configuration
 
 - [ ] 4. Create error handling system
   - [ ] 4.1 Create lib/schwab/error.rb with base Schwab::Error class inheriting from StandardError

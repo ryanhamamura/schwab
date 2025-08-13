@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 require_relative "schwab/version"
+require_relative "schwab/error"
 require_relative "schwab/configuration"
 require_relative "schwab/oauth"
+require_relative "schwab/client"
 
 module Schwab
-  class Error < StandardError; end
-
   class << self
     # Global configuration instance
     attr_writer :configuration
