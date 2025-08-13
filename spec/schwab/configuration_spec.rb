@@ -15,6 +15,37 @@ RSpec.describe(Schwab::Configuration) do
       expect(config.retry_delay).to(eq(1))
       expect(config.logger).to(be_nil)
       expect(config.faraday_adapter).to(eq(Faraday.default_adapter))
+      expect(config.response_format).to(eq(:hash))
+    end
+  end
+
+  describe "#response_format=" do
+    it "accepts :hash format" do
+      config = described_class.new
+      config.response_format = :hash
+      expect(config.response_format).to(eq(:hash))
+    end
+
+    it "accepts :resource format" do
+      config = described_class.new
+      config.response_format = :resource
+      expect(config.response_format).to(eq(:resource))
+    end
+
+    it "raises ArgumentError for invalid format" do
+      config = described_class.new
+      expect { config.response_format = :invalid }.to(raise_error(
+        ArgumentError,
+        "Invalid response_format: invalid. Must be :hash or :resource",
+      ))
+    end
+
+    it "raises ArgumentError for nil format" do
+      config = described_class.new
+      expect { config.response_format = nil }.to(raise_error(
+        ArgumentError,
+        "Invalid response_format: . Must be :hash or :resource",
+      ))
     end
   end
 
@@ -123,6 +154,43 @@ RSpec.describe(Schwab::Configuration) do
         ))
       end
     end
+
+    context "with invalid response_format" do
+      it "raises an error for invalid format" do
+        config = described_class.new
+        config.client_id = "test_id"
+        config.client_secret = "test_secret"
+        config.redirect_uri = "http://localhost:3000/callback"
+        config.instance_variable_set(:@response_format, :invalid)
+
+        expect { config.validate! }.to(raise_error(
+          Schwab::Error,
+          "Invalid response_format: invalid. Must be :hash or :resource",
+        ))
+      end
+    end
+
+    context "with valid response_format" do
+      it "validates successfully with :hash format" do
+        config = described_class.new
+        config.client_id = "test_id"
+        config.client_secret = "test_secret"
+        config.redirect_uri = "http://localhost:3000/callback"
+        config.response_format = :hash
+
+        expect(config.validate!).to(eq(true))
+      end
+
+      it "validates successfully with :resource format" do
+        config = described_class.new
+        config.client_id = "test_id"
+        config.client_secret = "test_secret"
+        config.redirect_uri = "http://localhost:3000/callback"
+        config.response_format = :resource
+
+        expect(config.validate!).to(eq(true))
+      end
+    end
   end
 
   describe "#oauth_configured?" do
@@ -165,6 +233,7 @@ RSpec.describe(Schwab::Configuration) do
       expect(hash[:max_retries]).to(eq(3))
       expect(hash[:retry_delay]).to(eq(1))
       expect(hash[:logger]).to(be_a(Logger))
+      expect(hash[:response_format]).to(eq(:hash))
     end
   end
 end
