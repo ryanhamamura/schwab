@@ -9,3 +9,13 @@
 
 # rspec failure tracking
 .rspec_status
+
+# Environment variables
+.env
+.env.local
+
+# VCR cassettes (may contain sensitive data)
+/spec/fixtures/vcr_cassettes/
+
+# OAuth test tokens
+.schwab_tokens.json

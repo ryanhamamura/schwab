@@ -1,6 +1,20 @@
 # frozen_string_literal: true
 
+require "simplecov"
+SimpleCov.start do
+  add_filter "/spec/"
+  add_filter "/vendor/"
+end
+
 require "schwab"
+require "dotenv"
+require "pry"
+
+# Load environment variables from .env file in test environment
+Dotenv.load
+
+# Load VCR configuration
+require_relative "support/vcr"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

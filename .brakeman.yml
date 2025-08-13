@@ -1,0 +1,75 @@
+# Brakeman configuration for Schwab SDK
+# This is a Ruby gem/library, not a Rails application
+
+# Skip Rails-specific checks since this is a gem
+skip_checks:
+  - CheckBasicAuth
+  - CheckCrossSiteScripting
+  - CheckDefaultRoutes
+  - CheckDetailedExceptions
+  - CheckDigestDoS
+  - CheckExecute
+  - CheckFileAccess
+  - CheckFilterSkipping
+  - CheckForgerySetting
+  - CheckJSONEncoding
+  - CheckJSONParsing
+  - CheckMailTo
+  - CheckMassAssignment
+  - CheckModelAttrAccessible
+  - CheckModelAttributes
+  - CheckModelSerialize
+  - CheckNestedAttributes
+  - CheckQuoteTableName
+  - CheckRedirect
+  - CheckRender
+  - CheckRenderDoS
+  - CheckResponseSplitting
+  - CheckRouteDoS
+  - CheckSafeBufferManipulation
+  - CheckSelectTag
+  - CheckSelectVulnerability
+  - CheckSend
+  - CheckSendFile
+  - CheckSessionSettings
+  - CheckSingleQuotes
+  - CheckSkipBeforeFilter
+  - CheckSQL
+  - CheckSSLVerify
+  - CheckStripTags
+  - CheckSymbolDoSCVE
+  - CheckTranslateBug
+  - CheckUnsafeReflection
+  - CheckValidationRegex
+  - CheckWithoutProtection
+  - CheckXMLDoS
+
+# Scan these directories
+app_path: lib
+
+# Ignore these files/directories
+skip_files:
+  - spec/
+  - test/
+  - doc/
+  - coverage/
+  - bin/oauth_test.rb  # Interactive script with user input
+
+# Don't assume this is a Rails app
+rails3: false
+rails4: false
+rails5: false
+rails6: false
+rails7: false
+assume_all_routes: false
+
+# Output settings
+report_direct: false
+summary_only: false
+
+# Security settings
+run_all_checks: false
+interprocedural: false
+
+# Confidence level (1 = High, 2 = Medium, 3 = Weak)
+confidence_level: 2

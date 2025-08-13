@@ -25,3 +25,11 @@ jobs:
           bundler-cache: true
       - name: Run the default task
         run: bundle exec rake
+      
+      - name: Quick security check
+        run: |
+          # Ensure no sensitive files are tracked
+          if git ls-files | grep -E '\.(env|tokens\.json|key|pem)$' | grep -v '.example'; then
+            echo "::error::Sensitive files found in repository!"
+            exit 1
+          fi
