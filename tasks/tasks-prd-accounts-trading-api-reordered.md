@@ -52,7 +52,7 @@
 
 ## Tasks (Reordered by Dependencies)
 
-- [ ] 1. Update Configuration for Response Format Support
+- [x] 1. Update Configuration for Response Format Support
   - [x] 1.1 Update `lib/schwab/configuration.rb` to add `response_format` option (:hash or :resource)
   - [x] 1.2 Add default value `:hash` for backward compatibility
   - [x] 1.3 Add validation for response_format values
@@ -60,18 +60,18 @@
   - [x] 1.5 Update configuration documentation
 
 - [ ] 2. Implement Resource Object Wrappers (Foundation)
-  - [ ] 2.1 Create `lib/schwab/resources/base.rb` with Sawyer::Resource-like functionality
-  - [ ] 2.2 Implement method_missing for hash-like access and method calls
-  - [ ] 2.3 Implement type coercion for dates, times, and numeric values
-  - [ ] 2.4 Add lazy loading for nested resources
-  - [ ] 2.5 Create `lib/schwab/resources/account.rb` with account-specific methods
-  - [ ] 2.6 Create `lib/schwab/resources/position.rb` with position calculations
-  - [ ] 2.7 Create `lib/schwab/resources/transaction.rb` with transaction type helpers
-  - [ ] 2.8 Create `lib/schwab/resources/order.rb` with order status helpers
-  - [ ] 2.9 Create `lib/schwab/resources/strategy.rb` for strategy object representation
-  - [ ] 2.10 Update response handling in client to use configured format
-  - [ ] 2.11 Write tests for each resource class in `spec/schwab/resources/`
-  - [ ] 2.12 Document resource object usage patterns
+  - [x] 2.1 Create `lib/schwab/resources/base.rb` with Sawyer::Resource-like functionality
+  - [x] 2.2 Implement method_missing for hash-like access and method calls
+  - [x] 2.3 Implement type coercion for dates, times, and numeric values
+  - [x] 2.4 Add lazy loading for nested resources
+  - [x] 2.5 Create `lib/schwab/resources/account.rb` with account-specific methods
+  - [x] 2.6 Create `lib/schwab/resources/position.rb` with position calculations
+  - [x] 2.7 Create `lib/schwab/resources/transaction.rb` with transaction type helpers
+  - [x] 2.8 Create `lib/schwab/resources/order.rb` with order status helpers
+  - [x] 2.9 Create `lib/schwab/resources/strategy.rb` for strategy object representation
+  - [x] 2.10 Update response handling in client to use configured format
+  - [x] 2.11 Write tests for each resource class in `spec/schwab/resources/`
+  - [x] 2.12 Document resource object usage patterns
 
 - [ ] 3. Create Account Management Module and Methods
   - [ ] 3.1 Create `lib/schwab/accounts.rb` module following pattern from `market_data.rb`

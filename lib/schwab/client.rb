@@ -3,6 +3,12 @@
 require_relative "connection"
 require_relative "middleware/authentication"
 require_relative "middleware/rate_limit"
+require_relative "resources/base"
+require_relative "resources/account"
+require_relative "resources/position"
+require_relative "resources/transaction"
+require_relative "resources/order"
+require_relative "resources/strategy"
 
 module Schwab
   # Main client for interacting with the Schwab API
@@ -39,45 +45,50 @@ module Schwab
     #
     # @param path [String] The API endpoint path
     # @param params [Hash] Query parameters
-    # @return [Hash] The parsed response
-    def get(path, params = {})
-      request(:get, path, params)
+    # @param resource_class [Class, nil] Optional resource class for response wrapping
+    # @return [Hash, Resources::Base] The response (hash or resource based on config)
+    def get(path, params = {}, resource_class = nil)
+      request(:get, path, params, resource_class)
     end
 
     # Make a POST request to the API
     #
     # @param path [String] The API endpoint path
     # @param body [Hash] Request body
-    # @return [Hash] The parsed response
-    def post(path, body = {})
-      request(:post, path, body)
+    # @param resource_class [Class, nil] Optional resource class for response wrapping
+    # @return [Hash, Resources::Base] The response (hash or resource based on config)
+    def post(path, body = {}, resource_class = nil)
+      request(:post, path, body, resource_class)
     end
 
     # Make a PUT request to the API
     #
     # @param path [String] The API endpoint path
     # @param body [Hash] Request body
-    # @return [Hash] The parsed response
-    def put(path, body = {})
-      request(:put, path, body)
+    # @param resource_class [Class, nil] Optional resource class for response wrapping
+    # @return [Hash, Resources::Base] The response (hash or resource based on config)
+    def put(path, body = {}, resource_class = nil)
+      request(:put, path, body, resource_class)
     end
 
     # Make a DELETE request to the API
     #
     # @param path [String] The API endpoint path
     # @param params [Hash] Query parameters
-    # @return [Hash] The parsed response
-    def delete(path, params = {})
-      request(:delete, path, params)
+    # @param resource_class [Class, nil] Optional resource class for response wrapping
+    # @return [Hash, Resources::Base] The response (hash or resource based on config)
+    def delete(path, params = {}, resource_class = nil)
+      request(:delete, path, params, resource_class)
     end
 
     # Make a PATCH request to the API
     #
     # @param path [String] The API endpoint path
     # @param body [Hash] Request body
-    # @return [Hash] The parsed response
-    def patch(path, body = {})
-      request(:patch, path, body)
+    # @param resource_class [Class, nil] Optional resource class for response wrapping
+    # @return [Hash, Resources::Base] The response (hash or resource based on config)
+    def patch(path, body = {}, resource_class = nil)
+      request(:patch, path, body, resource_class)
     end
 
     # Update the access token (useful after manual refresh)
@@ -131,7 +142,7 @@ module Schwab
       @on_token_refresh&.call(token_data)
     end
 
-    def request(method, path, params_or_body = {})
+    def request(method, path, params_or_body = {}, resource_class = nil)
       # Remove leading slash if present to work with Faraday's URL joining
       path = path.sub(%r{^/}, "")
 
@@ -144,9 +155,58 @@ module Schwab
         raise ArgumentError, "Unsupported HTTP method: #{method}"
       end
 
-      response.body
+      wrap_response(response.body, resource_class)
     rescue Faraday::Error => e
       handle_error(e)
+    end
+
+    # Wrap response data based on configured format
+    #
+    # @param data [Hash, Array] The response data
+    # @param resource_class [Class, nil] Optional resource class to use for wrapping
+    # @return [Hash, Array, Resources::Base] The wrapped response
+    def wrap_response(data, resource_class = nil)
+      return data if @config.response_format == :hash || data.nil?
+
+      # If response_format is :resource, wrap the response
+      if data.is_a?(Array)
+        data.map { |item| wrap_single_response(item, resource_class) }
+      else
+        wrap_single_response(data, resource_class)
+      end
+    end
+
+    # Wrap a single response item
+    #
+    # @param item [Hash] The response item
+    # @param resource_class [Class, nil] Optional resource class to use
+    # @return [Resources::Base] The wrapped response
+    def wrap_single_response(item, resource_class)
+      return item unless item.is_a?(Hash)
+
+      klass = resource_class || determine_resource_class(item)
+      klass.new(item, self)
+    end
+
+    # Determine the appropriate resource class based on response data
+    #
+    # @param data [Hash] The response data
+    # @return [Class] The resource class to use
+    def determine_resource_class(data)
+      # Check for specific identifiers in the response to determine type
+      if data.key?(:accountNumber) || data.key?(:account_number)
+        Resources::Account
+      elsif data.key?(:orderId) || data.key?(:order_id)
+        Resources::Order
+      elsif data.key?(:transactionId) || data.key?(:transaction_id)
+        Resources::Transaction
+      elsif data.key?(:instrument) && (data.key?(:longQuantity) || data.key?(:long_quantity))
+        Resources::Position
+      elsif data.key?(:strategyType) || data.key?(:strategy_type)
+        Resources::Strategy
+      else
+        Resources::Base
+      end
     end
 
     def handle_error(error)
