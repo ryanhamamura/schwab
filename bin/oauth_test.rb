@@ -178,7 +178,8 @@ class OAuthTester
     puts auth_url
 
     begin
-      system("open '#{auth_url}' 2>/dev/null || xdg-open '#{auth_url}' 2>/dev/null || start '#{auth_url}' 2>/dev/null")
+      # Use array form of system to prevent command injection
+      system("open", auth_url) || system("xdg-open", auth_url) || system("start", auth_url)
     rescue
       puts "\n⚠️  Could not open browser automatically."
     end

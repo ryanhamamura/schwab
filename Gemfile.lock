@@ -15,6 +15,8 @@ GEM
     ast (2.4.3)
     base64 (0.3.0)
     bigdecimal (3.2.2)
+    brakeman (6.2.2)
+      racc
     coderay (1.1.3)
     crack (1.0.0)
       bigdecimal
@@ -144,6 +146,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  brakeman (~> 6.0)
   dotenv (~> 2.8)
   irb
   pry (~> 0.14)

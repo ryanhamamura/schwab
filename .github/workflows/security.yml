@@ -1,0 +1,134 @@
+name: Security
+
+on:
+  push:
+    branches:
+      - main
+      - 'feat/**'
+      - 'fix/**'
+  pull_request:
+  schedule:
+    # Run security scans weekly on Monday at 9am UTC
+    - cron: '0 9 * * 1'
+
+jobs:
+  brakeman:
+    name: Brakeman Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.5'
+          bundler-cache: true
+      
+      - name: Install Brakeman
+        run: gem install brakeman
+      
+      - name: Run Brakeman
+        run: |
+          # Run Brakeman with appropriate flags for a gem/library project
+          brakeman --no-pager --format json --output brakeman-report.json --force || true
+      
+      - name: Check Brakeman results
+        run: |
+          if [ -f brakeman-report.json ]; then
+            warnings=$(jq '.scan_info.security_warnings' brakeman-report.json)
+            errors=$(jq '.errors | length' brakeman-report.json)
+            
+            echo "## Brakeman Security Scan Results" >> $GITHUB_STEP_SUMMARY
+            echo "Security warnings: $warnings" >> $GITHUB_STEP_SUMMARY
+            echo "Errors: $errors" >> $GITHUB_STEP_SUMMARY
+            
+            if [ "$warnings" -gt 0 ]; then
+              echo "::warning::Brakeman found $warnings security warnings"
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "### Warnings:" >> $GITHUB_STEP_SUMMARY
+              jq -r '.warnings[] | "- [\(.warning_type)] \(.message) in \(.file):\(.line)"' brakeman-report.json >> $GITHUB_STEP_SUMMARY || true
+            fi
+            
+            if [ "$errors" -gt 0 ]; then
+              echo "::warning::Brakeman encountered $errors errors"
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "### Errors:" >> $GITHUB_STEP_SUMMARY
+              jq -r '.errors[] | "- \(.error): \(.location)"' brakeman-report.json >> $GITHUB_STEP_SUMMARY || true
+            fi
+          fi
+      
+      - name: Upload Brakeman report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: brakeman-report
+          path: brakeman-report.json
+
+  rubocop-security:
+    name: RuboCop Security
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.5'
+          bundler-cache: true
+      
+      - name: Run RuboCop with security extension
+        run: |
+          bundle exec rubocop --only Security --format github --format json --out rubocop-security.json
+        continue-on-error: true
+      
+      - name: Generate security summary
+        if: always()
+        run: |
+          if [ -f rubocop-security.json ]; then
+            echo "## RuboCop Security Check" >> $GITHUB_STEP_SUMMARY
+            security_offenses=$(jq '[.files[].offenses[] | select(.cop_name | startswith("Security/"))] | length' rubocop-security.json)
+            echo "Security offenses found: $security_offenses" >> $GITHUB_STEP_SUMMARY
+            
+            if [ "$security_offenses" -gt 0 ]; then
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "### Security Issues:" >> $GITHUB_STEP_SUMMARY
+              jq -r '.files[] | select(.offenses | length > 0) | .offenses[] | select(.cop_name | startswith("Security/")) | "- [\(.cop_name)] \(.message) in \(.location.path):\(.location.line)"' rubocop-security.json >> $GITHUB_STEP_SUMMARY || true
+            else
+              echo "✅ No security issues detected" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+      
+      - name: Upload RuboCop security report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: rubocop-security-report
+          path: rubocop-security.json
+
+  secret-check:
+    name: Check for Secrets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Check for sensitive files
+        run: |
+          echo "## Sensitive File Check" >> $GITHUB_STEP_SUMMARY
+          
+          # Check that sensitive files are not tracked
+          sensitive_patterns=('.env$' '.tokens.json$' '.key$' '.pem$' '.secret$' 'credentials' 'password')
+          found_sensitive=false
+          
+          for pattern in "${sensitive_patterns[@]}"; do
+            if git ls-files | grep -E "$pattern" | grep -v '.example' | grep -v '.md'; then
+              echo "::error::Sensitive files matching pattern '$pattern' found in repository!"
+              echo "❌ Found sensitive files matching: $pattern" >> $GITHUB_STEP_SUMMARY
+              found_sensitive=true
+            fi
+          done
+          
+          if [ "$found_sensitive" = false ]; then
+            echo "✅ No sensitive files found in repository" >> $GITHUB_STEP_SUMMARY
+          else
+            exit 1
+          fi

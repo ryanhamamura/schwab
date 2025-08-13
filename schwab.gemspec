@@ -37,6 +37,9 @@ Gem::Specification.new do |spec|
   spec.add_dependency("oauth2", "~> 2.0")
   spec.add_dependency("sawyer", "~> 0.9")
 
+  # Development dependencies for security analysis
+  spec.add_development_dependency("brakeman", "~> 6.0")
+
   # For more information and examples about making a new gem, check out our
   # guide at: https://bundler.io/guides/creating_gem.html
 end
