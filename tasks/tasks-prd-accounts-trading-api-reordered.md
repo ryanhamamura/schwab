@@ -59,7 +59,7 @@
   - [x] 1.4 Write tests for configuration changes
   - [x] 1.5 Update configuration documentation
 
-- [ ] 2. Implement Resource Object Wrappers (Foundation)
+- [x] 2. Implement Resource Object Wrappers (Foundation)
   - [x] 2.1 Create `lib/schwab/resources/base.rb` with Sawyer::Resource-like functionality
   - [x] 2.2 Implement method_missing for hash-like access and method calls
   - [x] 2.3 Implement type coercion for dates, times, and numeric values
@@ -73,17 +73,17 @@
   - [x] 2.11 Write tests for each resource class in `spec/schwab/resources/`
   - [x] 2.12 Document resource object usage patterns
 
-- [ ] 3. Create Account Management Module and Methods
-  - [ ] 3.1 Create `lib/schwab/accounts.rb` module following pattern from `market_data.rb`
-  - [ ] 3.2 Implement `get_accounts(fields: nil, client: nil)` method with proper API endpoint mapping
-  - [ ] 3.3 Implement `get_account(account_id, fields: nil, client: nil)` for single account retrieval
-  - [ ] 3.4 Implement `get_positions(account_id, client: nil)` to fetch account positions
-  - [ ] 3.5 Implement `get_account_balances(account_id, client: nil)` for detailed balance info
-  - [ ] 3.6 Implement `get_transactions(account_id, from_date:, to_date:, types: nil, client: nil)` with pagination support
-  - [ ] 3.7 Implement `get_account_preferences(account_id, client: nil)` for account settings
-  - [ ] 3.8 Add module-level methods to `lib/schwab.rb` for accounts functionality
-  - [ ] 3.9 Write comprehensive tests in `spec/schwab/accounts_spec.rb` with VCR cassettes
-  - [ ] 3.10 Add YARD documentation for all public account methods
+- [x] 3. Create Account Management Module and Methods
+  - [x] 3.1 Create `lib/schwab/accounts.rb` module following pattern from `market_data.rb`
+  - [x] 3.2 Implement `get_accounts(fields: nil, client: nil)` method with proper API endpoint mapping
+  - [x] 3.3 Implement `get_account(account_id, fields: nil, client: nil)` for single account retrieval
+  - [x] 3.4 Implement `get_positions(account_id, client: nil)` to fetch account positions
+  - [x] 3.5 Implement `get_account_balances(account_id, client: nil)` for detailed balance info
+  - [x] 3.6 Implement `get_transactions(account_id, from_date:, to_date:, types: nil, client: nil)` with pagination support
+  - [x] 3.7 Implement `get_account_preferences(account_id, client: nil)` for account settings
+  - [x] 3.8 Add module-level methods to `lib/schwab.rb` for accounts functionality
+  - [x] 3.9 Write comprehensive tests in `spec/schwab/accounts_spec.rb` with VCR cassettes
+  - [x] 3.10 Add YARD documentation for all public account methods
 
 - [ ] 4. Add Order Validation and Preview Features
   - [ ] 4.1 Create `lib/schwab/order_validator.rb` with validation logic

@@ -6,6 +6,7 @@ require_relative "schwab/configuration"
 require_relative "schwab/oauth"
 require_relative "schwab/client"
 require_relative "schwab/market_data"
+require_relative "schwab/accounts"
 
 # Main namespace for the Schwab API SDK
 # @see https://developer.schwab.com/
@@ -13,6 +14,9 @@ module Schwab
   class << self
     # Global configuration instance
     attr_writer :configuration
+
+    # Global client instance (optional, for convenience)
+    attr_accessor :client
 
     # Access the global configuration
     def configuration
