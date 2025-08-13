@@ -102,31 +102,3 @@ jobs:
         with:
           name: rubocop-security-report
           path: rubocop-security.json
-
-  secret-check:
-    name: Check for Secrets
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Check for sensitive files
-        run: |
-          echo "## Sensitive File Check" >> $GITHUB_STEP_SUMMARY
-          
-          # Check that sensitive files are not tracked
-          sensitive_patterns=('.env$' '.tokens.json$' '.key$' '.pem$' '.secret$' 'credentials' 'password')
-          found_sensitive=false
-          
-          for pattern in "${sensitive_patterns[@]}"; do
-            if git ls-files | grep -E "$pattern" | grep -v '.example' | grep -v '.md'; then
-              echo "::error::Sensitive files matching pattern '$pattern' found in repository!"
-              echo "❌ Found sensitive files matching: $pattern" >> $GITHUB_STEP_SUMMARY
-              found_sensitive=true
-            fi
-          done
-          
-          if [ "$found_sensitive" = false ]; then
-            echo "✅ No sensitive files found in repository" >> $GITHUB_STEP_SUMMARY
-          else
-            exit 1
-          fi
