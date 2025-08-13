@@ -30,7 +30,7 @@
 
 ## Tasks
 
-- [ ] 1. Set up core dependencies and project structure
+- [x] 1. Set up core dependencies and project structure
   - [x] 1.1 Add required gems to schwab.gemspec: faraday (~> 2.0), oauth2 (~> 2.0), multi_json (~> 1.15), sawyer (~> 0.9)
   - [x] 1.2 Add development dependencies to Gemfile: vcr, webmock, pry, yard, simplecov
   - [x] 1.3 Run `bundle install` to install all dependencies
@@ -42,18 +42,18 @@
   - [x] 1.9 Add dotenv gem to Gemfile for development environment variable loading
   - [x] 1.10 Update .gitignore to exclude .env and VCR cassettes with sensitive data
 
-- [ ] 2. Implement OAuth authentication foundation
-  - [ ] 2.1 Create lib/schwab/oauth.rb with Schwab::OAuth module
-  - [ ] 2.2 Implement OAuth.authorization_url method to generate Schwab authorization URL with proper parameters
-  - [ ] 2.3 Implement OAuth.get_token method to exchange authorization code for access/refresh tokens
-  - [ ] 2.4 Implement OAuth.refresh_token method to get new access token using refresh token
-  - [ ] 2.5 Create lib/schwab/configuration.rb with Configuration class for storing client_id, client_secret, redirect_uri, api_base_url
-  - [ ] 2.6 Add Schwab.configure class method in lib/schwab.rb to set global configuration
-  - [ ] 2.7 Implement configuration validation to ensure required OAuth parameters are present
-  - [ ] 2.8 Create spec/schwab/oauth_spec.rb with tests for authorization_url generation
-  - [ ] 2.9 Add tests for OAuth.get_token with VCR cassette recording
-  - [ ] 2.10 Add tests for OAuth.refresh_token with VCR cassette recording
-  - [ ] 2.11 Create spec/schwab/configuration_spec.rb to test configuration validation and defaults
+- [x] 2. Implement OAuth authentication foundation
+  - [x] 2.1 Create lib/schwab/oauth.rb with Schwab::OAuth module
+  - [x] 2.2 Implement OAuth.authorization_url method to generate Schwab authorization URL with proper parameters
+  - [x] 2.3 Implement OAuth.get_token method to exchange authorization code for access/refresh tokens
+  - [x] 2.4 Implement OAuth.refresh_token method to get new access token using refresh token
+  - [x] 2.5 Create lib/schwab/configuration.rb with Configuration class for storing client_id, client_secret, redirect_uri, api_base_url
+  - [x] 2.6 Add Schwab.configure class method in lib/schwab.rb to set global configuration
+  - [x] 2.7 Implement configuration validation to ensure required OAuth parameters are present
+  - [x] 2.8 Create spec/schwab/oauth_spec.rb with tests for authorization_url generation
+  - [x] 2.9 Add tests for OAuth.get_token with VCR cassette recording
+  - [x] 2.10 Add tests for OAuth.refresh_token with VCR cassette recording
+  - [x] 2.11 Create spec/schwab/configuration_spec.rb to test configuration validation and defaults
 
 - [ ] 3. Build HTTP client layer with Faraday
   - [ ] 3.1 Create lib/schwab/connection.rb with Connection module for Faraday setup
