@@ -1,6 +1,26 @@
 ## [Unreleased]
 
 ### Added
+- Nothing yet
+
+### Changed
+- Nothing yet
+
+### Deprecated
+- Nothing yet
+
+### Removed
+- Nothing yet
+
+### Fixed
+- Nothing yet
+
+### Security
+- Nothing yet
+
+## [0.2.0] - 2025-08-14
+
+### Added
 - **Comprehensive Account Management System**
   - `Accounts.get_accounts` - Fetch all accounts with optional field filtering
   - `Accounts.get_account` - Get detailed single account information
