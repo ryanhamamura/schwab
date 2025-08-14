@@ -16,15 +16,17 @@ module Schwab
     #   resource[:age] # => 30
     #   resource.address.city # => "NYC"
     class Base
-      # Define fields that should be coerced to specific types
-      # Subclasses can override this to specify their field types
-      def self.field_types
-        @field_types ||= {}
-      end
+      class << self
+        # Define fields that should be coerced to specific types
+        # Subclasses can override this to specify their field types
+        def field_types
+          @field_types ||= {}
+        end
 
-      # Set field types for automatic coercion
-      def self.set_field_type(field, type)
-        field_types[field.to_sym] = type
+        # Set field types for automatic coercion
+        def set_field_type(field, type)
+          field_types[field.to_sym] = type
+        end
       end
 
       # Initialize a new resource with data
@@ -266,18 +268,15 @@ module Schwab
       # Coerce to DateTime
       def coerce_to_datetime(value)
         case value
-        when DateTime
+        when DateTime, Time
           value
-        when Time
-          value.to_datetime
         when Date
-          value.to_datetime
+          value.to_time
         when String
           Time.parse(value)
         when Integer, Float
           # Assume milliseconds timestamp if large number
-          time = value > 9999999999 ? Time.at(value / 1000.0) : Time.at(value)
-          time.to_datetime
+          value > 9999999999 ? Time.at(value / 1000.0) : Time.at(value)
         else
           value
         end

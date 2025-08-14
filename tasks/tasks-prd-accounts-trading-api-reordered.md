@@ -31,8 +31,8 @@
 - `lib/schwab/resources/position.rb` - Position resource object wrapper
 - `lib/schwab/resources/transaction.rb` - Transaction resource object wrapper
 - `lib/schwab/resources/strategy.rb` - Options strategy resource wrapper
-- `lib/schwab/order_validator.rb` - Client-side order validation
-- `lib/schwab/order_preview.rb` - Order preview functionality
+~~`lib/schwab/order_validator.rb` - Client-side order validation (REMOVED)~~
+~~`lib/schwab/order_preview.rb` - Order preview functionality (REMOVED - using existing API endpoint)~~
 - `lib/schwab.rb` - Main module (needs updating to include new modules)
 - `lib/schwab/configuration.rb` - Configuration (add response_format option)
 - `spec/schwab/accounts_spec.rb` - Tests for account methods
@@ -85,19 +85,19 @@
   - [x] 3.9 Write comprehensive tests in `spec/schwab/accounts_spec.rb` with VCR cassettes
   - [x] 3.10 Add YARD documentation for all public account methods
 
-- [ ] 4. Add Order Validation and Preview Features
-  - [ ] 4.1 Create `lib/schwab/order_validator.rb` with validation logic
-  - [ ] 4.2 Implement symbol validation against known symbols (use market data API)
-  - [ ] 4.3 Implement quantity validation (positive integers, lot sizes)
-  - [ ] 4.4 Implement price validation for limit/stop orders
-  - [ ] 4.5 Implement order type validation (required fields per type)
-  - [ ] 4.6 Create `lib/schwab/order_preview.rb` for preview functionality
-  - [ ] 4.7 Implement `preview_order(account_id, order:, client: nil)` method
-  - [ ] 4.8 Calculate estimated costs, commissions, and fees
-  - [ ] 4.9 Calculate margin requirements and buying power effect (needs account data)
-  - [ ] 4.10 Write comprehensive validation tests in `spec/schwab/order_validator_spec.rb`
-  - [ ] 4.11 Write preview tests in `spec/schwab/order_preview_spec.rb`
-  - [ ] 4.12 Document validation rules and preview response format
+- [x] 4. ~~Add Order Validation and Preview Features~~ (REMOVED - will implement later)
+  - [x] 4.1 ~~Create `lib/schwab/order_validator.rb` with validation logic~~ (REMOVED)
+  - [x] 4.2 ~~Implement symbol validation against known symbols (use market data API)~~ (REMOVED)
+  - [x] 4.3 ~~Implement quantity validation (positive integers, lot sizes)~~ (REMOVED)
+  - [x] 4.4 ~~Implement price validation for limit/stop orders~~ (REMOVED)
+  - [x] 4.5 ~~Implement order type validation (required fields per type)~~ (REMOVED)
+  - [x] 4.6 ~~Create `lib/schwab/order_preview.rb` for preview functionality~~ (REMOVED - preview_order already exists in Accounts module)
+  - [x] 4.7 ~~Implement `preview_order(account_id, order:, client: nil)` method~~ (ALREADY EXISTS in Accounts module)
+  - [x] 4.8 ~~Calculate estimated costs, commissions, and fees~~ (HANDLED by API endpoint)
+  - [x] 4.9 ~~Calculate margin requirements and buying power effect~~ (HANDLED by API endpoint)
+  - [x] 4.10 ~~Write comprehensive validation tests in `spec/schwab/order_validator_spec.rb`~~ (REMOVED)
+  - [x] 4.11 ~~Write preview tests in `spec/schwab/order_preview_spec.rb`~~ (NOT NEEDED - preview_order already tested in accounts_spec.rb)
+  - [x] 4.12 ~~Document validation rules and preview response format~~ (REMOVED)
 
 - [ ] 5. Create Trading Operations Module and Methods
   - [ ] 5.1 Create `lib/schwab/trading.rb` module with order management methods

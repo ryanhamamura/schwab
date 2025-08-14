@@ -47,8 +47,9 @@ module Schwab
       :open_timeout,
       :faraday_adapter,
       :max_retries,
-      :retry_delay,
-      :response_format
+      :retry_delay
+
+    attr_reader :response_format
 
     def initialize
       @api_base_url = "https://api.schwabapi.com"

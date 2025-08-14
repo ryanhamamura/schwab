@@ -14,7 +14,7 @@ require_relative "resources/strategy"
 module Schwab
   # Main client for interacting with the Schwab API
   class Client
-    attr_reader :access_token, :refresh_token, :auto_refresh, :config, :account_resolver
+    attr_reader :access_token, :refresh_token, :auto_refresh, :config
 
     # Initialize a new Schwab API client
     #

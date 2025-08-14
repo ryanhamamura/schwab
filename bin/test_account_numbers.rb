@@ -222,7 +222,7 @@ all_plain_accounts[0..1].each_with_index do |plain_acct, i|
       fees = order_value["fees"] || order_value[:fees]
       if fees.is_a?(Hash)
         total_fees = fees.values.map(&:to_f).sum
-        puts "      Total fees: $#{"%.2f" % total_fees}" if total_fees > 0
+        puts "      Total fees: $#{format("%.2f", total_fees)}" if total_fees > 0
       end
     end
   end

@@ -101,7 +101,12 @@ RSpec.describe(Schwab::Accounts) do
     end
 
     let(:account_with_positions) do
-      { accountNumber: account_number, positions: positions_response }
+      {
+        accountNumber: account_number,
+        securitiesAccount: {
+          positions: positions_response,
+        },
+      }
     end
 
     it "fetches positions by calling get_account with positions field" do
