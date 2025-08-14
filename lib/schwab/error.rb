@@ -42,7 +42,9 @@ module Schwab
   class ServerError < ApiError; end
 
   # Raised when API returns 400 Bad Request
-  class BadRequestError < ApiError; end
+  class BadRequestError < ApiError
+    attr_accessor :response_body
+  end
 
   # Raised when API returns an unexpected status code
   class UnexpectedResponseError < ApiError; end
