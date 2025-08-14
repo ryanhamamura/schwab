@@ -17,13 +17,29 @@ module Schwab
       set_field_type :pdt_flag, :boolean
       set_field_type :round_trips, :integer
 
-      # Get the account number/ID
+      # Get the account number/ID (plain text)
       #
       # @return [String] The account number
       def account_number
         self[:accountNumber] || self[:account_number]
       end
       alias_method :id, :account_number
+
+      # Get the encrypted hash value for this account
+      #
+      # @return [String, nil] The encrypted hash value used in API calls
+      def hash_value
+        self[:hashValue] || self[:hash_value]
+      end
+      alias_method :encrypted_id, :hash_value
+
+      # Get the appropriate account identifier for API calls
+      # Returns hash_value if available, otherwise account_number
+      #
+      # @return [String] The account identifier to use in API calls
+      def api_identifier
+        hash_value || account_number
+      end
 
       # Get the account type
       #

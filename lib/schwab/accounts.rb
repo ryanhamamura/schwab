@@ -37,7 +37,7 @@ module Schwab
       #   Schwab::Accounts.get_account("123456", fields: ["positions", "orders"])
       def get_account(account_number, fields: nil, client: nil)
         client ||= default_client
-        path = "/trader/v1/accounts/#{encode_account_number(account_number)}"
+        path = "/trader/v1/accounts/#{encode_account_number(account_number, client)}"
         params = {}
         params[:fields] = normalize_fields(fields) if fields
 
@@ -52,48 +52,47 @@ module Schwab
       # @example Get all positions
       #   Schwab::Accounts.get_positions("123456")
       def get_positions(account_number, client: nil)
-        client ||= default_client
-        path = "/trader/v1/accounts/#{encode_account_number(account_number)}/positions"
+        account_data = get_account(account_number, fields: "positions", client: client)
 
-        client.get(path, {}, Resources::Position)
-      end
+        if account_data.is_a?(Hash)
+          # Positions are nested under securitiesAccount
+          securities_account = account_data["securitiesAccount"] || account_data[:securitiesAccount]
+          positions = securities_account ? (securities_account["positions"] || securities_account[:positions]) : nil
+        elsif account_data.respond_to?(:positions)
+          positions = account_data.positions
+        end
 
-      # Get a specific position
-      #
-      # @param account_number [String] The account number
-      # @param symbol [String] The symbol
-      # @param client [Schwab::Client, nil] Optional client instance
-      # @return [Hash, Resources::Position] Position details
-      # @example Get AAPL position
-      #   Schwab::Accounts.get_position("123456", "AAPL")
-      def get_position(account_number, symbol, client: nil)
-        client ||= default_client
-        path = "/trader/v1/accounts/#{encode_account_number(account_number)}/positions/#{encode_symbol(symbol)}"
-
-        client.get(path, {}, Resources::Position)
+        positions || []
       end
 
       # Get transactions for a specific account
       #
       # @param account_number [String] The account number
-      # @param types [String, Array<String>, nil] Transaction types to filter
-      # @param start_date [Date, Time, String, nil] Start date for transactions
-      # @param end_date [Date, Time, String, nil] End date for transactions
+      # @param types [String, Array<String>] Transaction types to filter (REQUIRED). Valid values:
+      #   TRADE, RECEIVE_AND_DELIVER, DIVIDEND_OR_INTEREST, ACH_RECEIPT, ACH_DISBURSEMENT,
+      #   CASH_RECEIPT, CASH_DISBURSEMENT, ELECTRONIC_FUND, WIRE_OUT, WIRE_IN, JOURNAL,
+      #   MEMORANDUM, MARGIN_CALL, MONEY_MARKET, SMA_ADJUSTMENT
+      # @param start_date [Date, Time, String] Start date for transactions (ISO-8601 format, REQUIRED)
+      # @param end_date [Date, Time, String] End date for transactions (ISO-8601 format, REQUIRED)
       # @param symbol [String, nil] Filter by symbol
       # @param client [Schwab::Client, nil] Optional client instance
       # @return [Array<Hash>, Array<Resources::Transaction>] List of transactions
-      # @example Get all transactions
-      #   Schwab::Accounts.get_transactions("123456")
+      # @example Get all trade transactions
+      #   Schwab::Accounts.get_transactions("123456",
+      #     types: "TRADE",
+      #     start_date: "2024-01-01",
+      #     end_date: "2024-01-31"
+      #   )
       # @example Get trades for AAPL in date range
       #   Schwab::Accounts.get_transactions("123456",
       #     types: "TRADE",
       #     symbol: "AAPL",
-      #     start_date: Date.today - 30,
-      #     end_date: Date.today
+      #     start_date: "2024-01-01",
+      #     end_date: "2024-01-31"
       #   )
       def get_transactions(account_number, types: nil, start_date: nil, end_date: nil, symbol: nil, client: nil)
         client ||= default_client
-        path = "/trader/v1/accounts/#{encode_account_number(account_number)}/transactions"
+        path = "/trader/v1/accounts/#{encode_account_number(account_number, client)}/transactions"
 
         params = {}
         params[:types] = normalize_transaction_types(types) if types
@@ -114,7 +113,7 @@ module Schwab
       #   Schwab::Accounts.get_transaction("123456", "trans789")
       def get_transaction(account_number, transaction_id, client: nil)
         client ||= default_client
-        path = "/trader/v1/accounts/#{encode_account_number(account_number)}/transactions/#{transaction_id}"
+        path = "/trader/v1/accounts/#{encode_account_number(account_number, client)}/transactions/#{transaction_id}"
 
         client.get(path, {}, Resources::Transaction)
       end
@@ -122,19 +121,26 @@ module Schwab
       # Get orders for a specific account
       #
       # @param account_number [String] The account number
-      # @param from_entered_time [Time, DateTime, String, nil] Start time for orders
-      # @param to_entered_time [Time, DateTime, String, nil] End time for orders
-      # @param status [String, Array<String>, nil] Order status filter
-      # @param max_results [Integer, nil] Maximum number of results
+      # @param from_entered_time [Time, DateTime, String, nil] Start time for orders (ISO-8601 format required)
+      # @param to_entered_time [Time, DateTime, String, nil] End time for orders (ISO-8601 format required)
+      # @param status [String, Array<String>, nil] Order status filter. Valid values:
+      #   AWAITING_PARENT_ORDER, AWAITING_CONDITION, AWAITING_STOP_CONDITION, AWAITING_MANUAL_REVIEW,
+      #   ACCEPTED, AWAITING_UR_OUT, PENDING_ACTIVATION, QUEUED, WORKING, REJECTED, PENDING_CANCEL,
+      #   CANCELED, PENDING_REPLACE, REPLACED, FILLED, EXPIRED, NEW, AWAITING_RELEASE_TIME,
+      #   PENDING_ACKNOWLEDGEMENT, PENDING_RECALL, UNKNOWN
+      # @param max_results [Integer, nil] Maximum number of results (defaults to 3000)
       # @param client [Schwab::Client, nil] Optional client instance
       # @return [Array<Hash>, Array<Resources::Order>] List of orders
-      # @example Get all orders
-      #   Schwab::Accounts.get_orders("123456")
+      # @example Get all orders with time range
+      #   Schwab::Accounts.get_orders("123456",
+      #     from_entered_time: "2024-03-29T00:00:00.000Z",
+      #     to_entered_time: "2024-03-30T00:00:00.000Z"
+      #   )
       # @example Get working orders
       #   Schwab::Accounts.get_orders("123456", status: "WORKING")
       def get_orders(account_number, from_entered_time: nil, to_entered_time: nil, status: nil, max_results: nil, client: nil)
         client ||= default_client
-        path = "/trader/v1/accounts/#{encode_account_number(account_number)}/orders"
+        path = "/trader/v1/accounts/#{encode_account_number(account_number, client)}/orders"
 
         params = {}
         params[:fromEnteredTime] = format_datetime(from_entered_time) if from_entered_time
@@ -183,41 +189,21 @@ module Schwab
       #   Schwab::Accounts.get_order("123456", "order789")
       def get_order(account_number, order_id, client: nil)
         client ||= default_client
-        path = "/trader/v1/accounts/#{encode_account_number(account_number)}/orders/#{order_id}"
+        path = "/trader/v1/accounts/#{encode_account_number(account_number, client)}/orders/#{order_id}"
 
         client.get(path, {}, Resources::Order)
       end
 
-      # Get account preferences
+      # Get account numbers and their encrypted hash values
       #
-      # @param account_number [String] The account number
       # @param client [Schwab::Client, nil] Optional client instance
-      # @return [Hash] Account preferences
-      # @example Get preferences
-      #   Schwab::Accounts.get_preferences("123456")
-      def get_preferences(account_number, client: nil)
+      # @return [Array<Hash>] Array of account number/hash value pairs
+      # @example Get account numbers
+      #   Schwab::Accounts.get_account_numbers
+      #   # => [{accountNumber: "123456789", hashValue: "ABC123XYZ"}, ...]
+      def get_account_numbers(client: nil)
         client ||= default_client
-        path = "/trader/v1/accounts/#{encode_account_number(account_number)}/preferences"
-
-        client.get(path)
-      end
-
-      # Update account preferences
-      #
-      # @param account_number [String] The account number
-      # @param preferences [Hash] Preferences to update
-      # @param client [Schwab::Client, nil] Optional client instance
-      # @return [Hash] Updated preferences
-      # @example Update preferences
-      #   Schwab::Accounts.update_preferences("123456", {
-      #     expressTrading: true,
-      #     defaultEquityOrderType: "LIMIT"
-      #   })
-      def update_preferences(account_number, preferences, client: nil)
-        client ||= default_client
-        path = "/trader/v1/accounts/#{encode_account_number(account_number)}/preferences"
-
-        client.put(path, preferences)
+        client.get("/trader/v1/accounts/accountNumbers")
       end
 
       # Get user preferences (across all accounts)
@@ -231,14 +217,44 @@ module Schwab
         client.get("/trader/v1/userPreference")
       end
 
+      # Preview an order before placing it
+      #
+      # @param account_number [String] The account number
+      # @param order_data [Hash] Order details to preview
+      # @param client [Schwab::Client, nil] Optional client instance
+      # @return [Hash] Order preview with estimated costs, commissions, and margin requirements
+      # @example Preview a buy order
+      #   Schwab::Accounts.preview_order("123456", {
+      #     orderType: "MARKET",
+      #     session: "NORMAL",
+      #     duration: "DAY",
+      #     orderStrategyType: "SINGLE",
+      #     orderLegCollection: [{
+      #       instruction: "BUY",
+      #       quantity: 10,
+      #       instrument: {
+      #         symbol: "AAPL",
+      #         assetType: "EQUITY"
+      #       }
+      #     }]
+      #   })
+      def preview_order(account_number, order_data, client: nil)
+        client ||= default_client
+        path = "/trader/v1/accounts/#{encode_account_number(account_number, client)}/previewOrder"
+
+        client.post(path, order_data)
+      end
+
       private
 
       def default_client
         Schwab.client || raise(Error, "No client configured. Set Schwab.client or pass a client instance.")
       end
 
-      def encode_account_number(account_number)
-        URI.encode_www_form_component(account_number.to_s)
+      def encode_account_number(account_number, client = nil)
+        client ||= default_client
+        encrypted_number = client.resolve_account_number(account_number)
+        URI.encode_www_form_component(encrypted_number)
       end
 
       def encode_symbol(symbol)
@@ -285,7 +301,12 @@ module Schwab
         when Time, DateTime
           date.to_date.iso8601
         when String
-          Date.parse(date).iso8601
+          # If string already contains time info, preserve it
+          if date.include?("T") && date.include?(":")
+            date
+          else
+            Date.parse(date).iso8601
+          end
         else
           date.to_s
         end

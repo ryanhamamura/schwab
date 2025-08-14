@@ -4,6 +4,7 @@ require "time"
 require "date"
 
 module Schwab
+  # Resource objects for wrapping API responses with convenient access patterns
   module Resources
     # Base class for resource objects that wrap API response hashes
     # Provides Sawyer::Resource-like functionality for method access to hash data

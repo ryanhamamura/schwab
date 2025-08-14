@@ -316,4 +316,53 @@ RSpec.describe(Schwab::Client) do
       expect(client.refresh_token).to(eq("new_refresh"))
     end
   end
+
+  describe "account number resolution" do
+    let(:client) { described_class.new(access_token: access_token, config: config) }
+
+    describe "#account_resolver" do
+      it "returns an AccountNumberResolver instance" do
+        resolver = client.account_resolver
+        expect(resolver).to(be_a(Schwab::AccountNumberResolver))
+      end
+
+      it "returns the same resolver instance on multiple calls" do
+        resolver1 = client.account_resolver
+        resolver2 = client.account_resolver
+        expect(resolver1).to(be(resolver2))
+      end
+    end
+
+    describe "#resolve_account_number" do
+      let(:account_numbers_response) do
+        [{ accountNumber: "123456789", hashValue: "ABC123XYZ" }]
+      end
+
+      before do
+        allow(client).to(receive(:get)
+          .with("/trader/v1/accounts/accountNumbers")
+          .and_return(account_numbers_response))
+      end
+
+      it "delegates to the account resolver" do
+        result = client.resolve_account_number("123456789")
+        expect(result).to(eq("ABC123XYZ"))
+      end
+
+      it "passes through hash values unchanged" do
+        result = client.resolve_account_number("ABC123XYZ")
+        expect(result).to(eq("ABC123XYZ"))
+      end
+    end
+
+    describe "#refresh_account_mappings!" do
+      it "delegates to the account resolver" do
+        resolver = instance_double("Schwab::AccountNumberResolver")
+        allow(client).to(receive(:account_resolver).and_return(resolver))
+        expect(resolver).to(receive(:refresh!))
+
+        client.refresh_account_mappings!
+      end
+    end
+  end
 end

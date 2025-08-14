@@ -3,6 +3,7 @@
 require_relative "connection"
 require_relative "middleware/authentication"
 require_relative "middleware/rate_limit"
+require_relative "account_number_resolver"
 require_relative "resources/base"
 require_relative "resources/account"
 require_relative "resources/position"
@@ -13,7 +14,7 @@ require_relative "resources/strategy"
 module Schwab
   # Main client for interacting with the Schwab API
   class Client
-    attr_reader :access_token, :refresh_token, :auto_refresh, :config
+    attr_reader :access_token, :refresh_token, :auto_refresh, :config, :account_resolver
 
     # Initialize a new Schwab API client
     #
@@ -29,6 +30,7 @@ module Schwab
       @on_token_refresh = on_token_refresh
       @config = config || Schwab.configuration || Configuration.new
       @connection = nil
+      @account_resolver = nil
       @mutex = Mutex.new
     end
 
@@ -111,6 +113,34 @@ module Schwab
         @refresh_token = refresh_token if refresh_token
         @connection = nil # Force rebuild of connection
       end
+    end
+
+    # Get the account number resolver (lazily initialized)
+    #
+    # @return [AccountNumberResolver] The account number resolver
+    def account_resolver
+      @mutex.synchronize do
+        @account_resolver ||= AccountNumberResolver.new(self)
+      end
+    end
+
+    # Resolve an account number to its encrypted hash value
+    #
+    # @param account_number [String] Plain account number or encrypted hash
+    # @return [String] The encrypted hash value for API calls
+    # @example Resolve account number
+    #   client.resolve_account_number("123456789")  # => "ABC123XYZ"
+    def resolve_account_number(account_number)
+      account_resolver.resolve(account_number)
+    end
+
+    # Refresh account number mappings
+    #
+    # @return [void]
+    # @example Refresh account mappings
+    #   client.refresh_account_mappings!
+    def refresh_account_mappings!
+      account_resolver.refresh!
     end
 
     private
@@ -221,6 +251,11 @@ module Schwab
         raise Schwab::NotFoundError, "Resource not found: #{error.message}"
       when Faraday::TooManyRequestsError
         raise Schwab::RateLimitError, "Rate limit exceeded: #{error.message}"
+      when Faraday::BadRequestError
+        # Preserve the response body for BadRequestError so we can parse JSON error details
+        bad_request_error = Schwab::BadRequestError.new("Bad request: #{error.message}")
+        bad_request_error.response_body = error.response[:body] if error.response && error.response[:body]
+        raise bad_request_error
       when Faraday::ServerError
         raise Schwab::ServerError, "Server error: #{error.message}"
       else

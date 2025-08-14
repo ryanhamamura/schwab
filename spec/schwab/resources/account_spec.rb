@@ -244,4 +244,52 @@ RSpec.describe(Schwab::Resources::Account) do
       expect(account.round_trips).to(be_a(Integer))
     end
   end
+
+  describe "encrypted account number support" do
+    let(:account_data_with_hash) do
+      {
+        accountNumber: "123456789",
+        hashValue: "ABC123XYZ",
+        type: "MARGIN",
+        status: "ACTIVE",
+      }
+    end
+
+    describe "#hash_value" do
+      it "returns the hash value when present" do
+        account = described_class.new(account_data_with_hash, client)
+        expect(account.hash_value).to(eq("ABC123XYZ"))
+      end
+
+      it "supports snake_case key" do
+        data = { accountNumber: "123456789", hash_value: "DEF456UVW" }
+        account = described_class.new(data, client)
+        expect(account.hash_value).to(eq("DEF456UVW"))
+      end
+
+      it "returns nil when not present" do
+        account = described_class.new({ accountNumber: "123456789" }, client)
+        expect(account.hash_value).to(be_nil)
+      end
+    end
+
+    describe "#encrypted_id" do
+      it "is an alias for hash_value" do
+        account = described_class.new(account_data_with_hash, client)
+        expect(account.encrypted_id).to(eq("ABC123XYZ"))
+      end
+    end
+
+    describe "#api_identifier" do
+      it "returns hash_value when present" do
+        account = described_class.new(account_data_with_hash, client)
+        expect(account.api_identifier).to(eq("ABC123XYZ"))
+      end
+
+      it "falls back to account_number when hash_value not present" do
+        account = described_class.new({ accountNumber: "123456789" }, client)
+        expect(account.api_identifier).to(eq("123456789"))
+      end
+    end
+  end
 end

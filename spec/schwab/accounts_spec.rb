@@ -6,9 +6,14 @@ require "schwab/accounts"
 RSpec.describe(Schwab::Accounts) do
   let(:client) { instance_double("Schwab::Client") }
   let(:account_number) { "123456789" }
+  let(:encrypted_account) { "ABC123XYZ" }
 
   before do
     allow(Schwab).to(receive(:client).and_return(client))
+    # Mock the account resolver to return encrypted values
+    allow(client).to(receive(:resolve_account_number)
+      .with(account_number)
+      .and_return(encrypted_account))
   end
 
   describe ".get_accounts" do
@@ -59,7 +64,7 @@ RSpec.describe(Schwab::Accounts) do
 
     it "fetches a single account" do
       expect(client).to(receive(:get)
-        .with("/trader/v1/accounts/#{account_number}", {}, Schwab::Resources::Account)
+        .with("/trader/v1/accounts/#{encrypted_account}", {}, Schwab::Resources::Account)
         .and_return(account_response))
 
       result = described_class.get_account(account_number)
@@ -68,7 +73,7 @@ RSpec.describe(Schwab::Accounts) do
 
     it "includes fields when specified" do
       expect(client).to(receive(:get)
-        .with("/trader/v1/accounts/#{account_number}", { fields: "positions" }, Schwab::Resources::Account)
+        .with("/trader/v1/accounts/#{encrypted_account}", { fields: "positions" }, Schwab::Resources::Account)
         .and_return(account_response))
 
       described_class.get_account(account_number, fields: "positions")
@@ -76,8 +81,11 @@ RSpec.describe(Schwab::Accounts) do
 
     it "encodes account number" do
       special_account = "123#456"
+      expect(client).to(receive(:resolve_account_number)
+        .with(special_account)
+        .and_return("ENCODED123HASH"))
       expect(client).to(receive(:get)
-        .with("/trader/v1/accounts/123%23456", {}, Schwab::Resources::Account)
+        .with("/trader/v1/accounts/ENCODED123HASH", {}, Schwab::Resources::Account)
         .and_return(account_response))
 
       described_class.get_account(special_account)
@@ -92,35 +100,27 @@ RSpec.describe(Schwab::Accounts) do
       ]
     end
 
-    it "fetches all positions for an account" do
-      expect(client).to(receive(:get)
-        .with("/trader/v1/accounts/#{account_number}/positions", {}, Schwab::Resources::Position)
-        .and_return(positions_response))
+    let(:account_with_positions) do
+      { accountNumber: account_number, positions: positions_response }
+    end
 
-      result = described_class.get_positions(account_number)
+    it "fetches positions by calling get_account with positions field" do
+      expect(described_class).to(receive(:get_account)
+        .with(account_number, { fields: "positions", client: client })
+        .and_return(account_with_positions))
+
+      result = described_class.get_positions(account_number, client: client)
       expect(result).to(eq(positions_response))
     end
-  end
 
-  describe ".get_position" do
-    let(:symbol) { "AAPL" }
-    let(:position_response) { { symbol: symbol, longQuantity: 100 } }
+    it "returns empty array when no positions" do
+      account_no_positions = { accountNumber: account_number }
+      expect(described_class).to(receive(:get_account)
+        .with(account_number, { fields: "positions", client: client })
+        .and_return(account_no_positions))
 
-    it "fetches a specific position" do
-      expect(client).to(receive(:get)
-        .with("/trader/v1/accounts/#{account_number}/positions/#{symbol}", {}, Schwab::Resources::Position)
-        .and_return(position_response))
-
-      result = described_class.get_position(account_number, symbol)
-      expect(result).to(eq(position_response))
-    end
-
-    it "uppercases and encodes symbol" do
-      expect(client).to(receive(:get)
-        .with("/trader/v1/accounts/#{account_number}/positions/BRK.B", {}, Schwab::Resources::Position)
-        .and_return(position_response))
-
-      described_class.get_position(account_number, "brk.b")
+      result = described_class.get_positions(account_number, client: client)
+      expect(result).to(eq([]))
     end
   end
 
@@ -134,7 +134,7 @@ RSpec.describe(Schwab::Accounts) do
 
     it "fetches transactions for an account" do
       expect(client).to(receive(:get)
-        .with("/trader/v1/accounts/#{account_number}/transactions", {}, Schwab::Resources::Transaction)
+        .with("/trader/v1/accounts/#{encrypted_account}/transactions", {}, Schwab::Resources::Transaction)
         .and_return(transactions_response))
 
       result = described_class.get_transactions(account_number)
@@ -147,7 +147,7 @@ RSpec.describe(Schwab::Accounts) do
 
       expect(client).to(receive(:get)
         .with(
-          "/trader/v1/accounts/#{account_number}/transactions",
+          "/trader/v1/accounts/#{encrypted_account}/transactions",
           {
             types: "TRADE",
             startDate: "2024-01-01",
@@ -170,7 +170,7 @@ RSpec.describe(Schwab::Accounts) do
     it "handles array of transaction types" do
       expect(client).to(receive(:get)
         .with(
-          "/trader/v1/accounts/#{account_number}/transactions",
+          "/trader/v1/accounts/#{encrypted_account}/transactions",
           { types: "TRADE,DIVIDEND" },
           Schwab::Resources::Transaction,
         )
@@ -186,7 +186,7 @@ RSpec.describe(Schwab::Accounts) do
 
     it "fetches a specific transaction" do
       expect(client).to(receive(:get)
-        .with("/trader/v1/accounts/#{account_number}/transactions/#{transaction_id}", {}, Schwab::Resources::Transaction)
+        .with("/trader/v1/accounts/#{encrypted_account}/transactions/#{transaction_id}", {}, Schwab::Resources::Transaction)
         .and_return(transaction_response))
 
       result = described_class.get_transaction(account_number, transaction_id)
@@ -204,7 +204,7 @@ RSpec.describe(Schwab::Accounts) do
 
     it "fetches orders for an account" do
       expect(client).to(receive(:get)
-        .with("/trader/v1/accounts/#{account_number}/orders", {}, Schwab::Resources::Order)
+        .with("/trader/v1/accounts/#{encrypted_account}/orders", {}, Schwab::Resources::Order)
         .and_return(orders_response))
 
       result = described_class.get_orders(account_number)
@@ -217,7 +217,7 @@ RSpec.describe(Schwab::Accounts) do
 
       expect(client).to(receive(:get)
         .with(
-          "/trader/v1/accounts/#{account_number}/orders",
+          "/trader/v1/accounts/#{encrypted_account}/orders",
           {
             fromEnteredTime: from_time.iso8601,
             toEnteredTime: to_time.iso8601,
@@ -274,7 +274,7 @@ RSpec.describe(Schwab::Accounts) do
 
     it "fetches a specific order" do
       expect(client).to(receive(:get)
-        .with("/trader/v1/accounts/#{account_number}/orders/#{order_id}", {}, Schwab::Resources::Order)
+        .with("/trader/v1/accounts/#{encrypted_account}/orders/#{order_id}", {}, Schwab::Resources::Order)
         .and_return(order_response))
 
       result = described_class.get_order(account_number, order_id)
@@ -282,32 +282,79 @@ RSpec.describe(Schwab::Accounts) do
     end
   end
 
-  describe ".get_preferences" do
-    let(:preferences_response) do
-      { expressTrading: true, defaultEquityOrderType: "LIMIT" }
+  describe ".preview_order" do
+    let(:order_data) do
+      {
+        orderType: "MARKET",
+        session: "NORMAL",
+        duration: "DAY",
+        orderStrategyType: "SINGLE",
+        orderLegCollection: [{
+          instruction: "BUY",
+          quantity: 10,
+          instrument: {
+            symbol: "AAPL",
+            assetType: "EQUITY",
+          },
+        }],
+      }
     end
 
-    it "fetches account preferences" do
-      expect(client).to(receive(:get)
-        .with("/trader/v1/accounts/#{account_number}/preferences")
-        .and_return(preferences_response))
+    let(:preview_response) do
+      {
+        orderActivity: {
+          activityType: "EXECUTION",
+          executionType: "FILL",
+          quantity: 10,
+          orderRemainingQuantity: 0,
+          executionLegs: [{
+            legId: 1,
+            quantity: 10,
+            mismarkedQuantity: 0,
+            price: 150.25,
+            time: "2024-01-15T14:30:00Z",
+          }],
+        },
+        previewId: "preview123",
+        orderValue: {
+          commission: 0,
+          fees: {
+            additionalFee: 0,
+            commission: 0,
+            optRegFee: 0,
+            otherCharges: 0,
+            rFee: 0,
+            secFee: 0.01,
+          },
+        },
+      }
+    end
 
-      result = described_class.get_preferences(account_number)
-      expect(result).to(eq(preferences_response))
+    it "previews an order" do
+      expect(client).to(receive(:post)
+        .with("/trader/v1/accounts/#{encrypted_account}/previewOrder", order_data)
+        .and_return(preview_response))
+
+      result = described_class.preview_order(account_number, order_data)
+      expect(result).to(eq(preview_response))
     end
   end
 
-  describe ".update_preferences" do
-    let(:preferences) { { expressTrading: false } }
-    let(:updated_response) { preferences }
+  describe ".get_account_numbers" do
+    let(:account_numbers_response) do
+      [
+        { accountNumber: "123456789", hashValue: "ABC123XYZ" },
+        { accountNumber: "987654321", hashValue: "DEF456UVW" },
+      ]
+    end
 
-    it "updates account preferences" do
-      expect(client).to(receive(:put)
-        .with("/trader/v1/accounts/#{account_number}/preferences", preferences)
-        .and_return(updated_response))
+    it "fetches account numbers and hash values" do
+      expect(client).to(receive(:get)
+        .with("/trader/v1/accounts/accountNumbers")
+        .and_return(account_numbers_response))
 
-      result = described_class.update_preferences(account_number, preferences)
-      expect(result).to(eq(updated_response))
+      result = described_class.get_account_numbers
+      expect(result).to(eq(account_numbers_response))
     end
   end
 
@@ -342,7 +389,7 @@ RSpec.describe(Schwab::Accounts) do
       date = Date.new(2024, 1, 15)
       expect(client).to(receive(:get)
         .with(
-          "/trader/v1/accounts/#{account_number}/transactions",
+          "/trader/v1/accounts/#{encrypted_account}/transactions",
           { startDate: "2024-01-15" },
           Schwab::Resources::Transaction,
         )
@@ -355,7 +402,7 @@ RSpec.describe(Schwab::Accounts) do
       time = Time.new(2024, 1, 15, 10, 30, 0)
       expect(client).to(receive(:get)
         .with(
-          "/trader/v1/accounts/#{account_number}/orders",
+          "/trader/v1/accounts/#{encrypted_account}/orders",
           { fromEnteredTime: time.iso8601 },
           Schwab::Resources::Order,
         )
@@ -367,7 +414,7 @@ RSpec.describe(Schwab::Accounts) do
     it "parses date strings" do
       expect(client).to(receive(:get)
         .with(
-          "/trader/v1/accounts/#{account_number}/transactions",
+          "/trader/v1/accounts/#{encrypted_account}/transactions",
           { startDate: "2024-01-15" },
           Schwab::Resources::Transaction,
         )
